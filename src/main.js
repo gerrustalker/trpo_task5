@@ -1,6 +1,13 @@
 import express from 'express'
 
 const app = express()
+app.get("/", (req, res) => res.status(200).send("hi"))
+
+app.use(express.json())
+app.use((req, _, next) => {
+    console.log(`[${new Date().toUTCString()}] [${req.method}] ${req.url}`)
+    next()
+})
 
 const db = {products: [], orders: [], users: []} // temp?
 
@@ -41,6 +48,9 @@ class Order {
     complete() {
         this.status = ORDER_COMPLETED
     }
+    cancel() {
+        this.status = ORDER_CANCELLED
+    }
 }
 
 class User {
@@ -53,13 +63,18 @@ class User {
     }
 }
 
-const router = new express.Router()
-
-router.post('/register', (req, res) => {
+const api = express.Router()
+api.post('/register', (req, res) => {
     
 })
+app.use("/api", api)
 
-app.use("/api", router)
+app.post("/echo", (req, res) => res.json(req.body))
+
+const admin = express.Router()
+admin.use((req, res, next) => {if(!req.get("authorization")) return res.status(401).send("nope"); next()})
+admin.get("/", (req, res) => res.status(200).send("you made it to /admin"))
+app.use("/admin", admin)
 
 app.listen(3000, () => {
     console.log('Server is running on http://localhost:3000')
