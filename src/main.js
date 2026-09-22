@@ -1,4 +1,5 @@
 import express from "express"
+import cors from "cors"
 import fs from "fs/promises"
 
 const app = express()
@@ -17,6 +18,9 @@ app.use((req, _, next) => {
     console.log(`[${new Date().toUTCString()}] [${req.method}] ${req.url}`)
     next()
 })
+app.use(cors({
+    origin: ["http://localhost:5173", "http://localhost:3000"]
+}))
 app.get("/", (req, res) => res.status(200).send("hi"))
 
 const db = {products: [], orders: [], users: []} // temp?
