@@ -2,13 +2,22 @@ import express from "express"
 import fs from "fs/promises"
 
 const app = express()
-app.get("/", (req, res) => res.status(200).send("hi"))
-
+const baddies = new Map()
+app.use((req, res, next) => {
+    const n = (baddies.get(req.ip) ?? 0) + 1
+    if(n >= 5) res.status(429).send("too many requests")
+    else {baddies.set(req.ip, n); next()}
+})
+setInterval(() => {
+    baddies.clear()
+}, 10000);
 app.use(express.json())
+
 app.use((req, _, next) => {
     console.log(`[${new Date().toUTCString()}] [${req.method}] ${req.url}`)
     next()
 })
+app.get("/", (req, res) => res.status(200).send("hi"))
 
 const db = {products: [], orders: [], users: []} // temp?
 
