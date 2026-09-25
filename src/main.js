@@ -92,11 +92,11 @@ app.post("/echo", (req, res) => res.json(req.body))
 
 app.get("/search", (req, res) => {
     const q = req.query.q
-    if(!q || q.trim() === "") return res.status(400).json({error: "users", message: "no query"})
+    if(!q || q.trim() === "") return res.status(400).json({error: "search", message: "no query"})
     res.status(200).json({query: q})
 })
 
-import rusers from "./routes/users.js"
+import rusers from "./controllers/users.js"
 app.use("/users", rusers)
 
 app.listen(3000, () => {
