@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import IUsers from '../services/users.js'
+import * as IUsers from '../services/users.js'
 import { ID as validateID } from '../utils/validators.js'
 
 const app = Router()
