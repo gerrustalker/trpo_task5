@@ -89,5 +89,5 @@ const OrderItem = sequelize.define("OrderItem", {
         defaultValue: 0
     }
 })
-(async () => await sequelize.sync({ force: false }))(sequelize)
+{(async () => await sequelize.sync({ force: false }))(sequelize)}
 export { User, Product, Order, OrderItem }
