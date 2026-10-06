@@ -4,6 +4,21 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
+            * {
+                margin: 0; padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                width: 100vw;
+                max-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                flex-wrap: wrap;
+                gap: 1em;
+                padding: 1em;
+            }
+
             form {
                 display: flex;
                 flex-direction: column;
@@ -12,74 +27,153 @@
                 max-width: 300px;
                 text-wrap: wrap;
                 flex-wrap: wrap;
+                flex-shrink: 1;
             }
+
             label {
                 display: flex;
                 justify-content: space-between;
             }
+
+            textarea {
+                width: 300px;
+                overflow: auto;
+            }
         </style>
     </head>
     <body>
-        <h1>/auth/register</h1>
-        <form id="regform">
+        <!-- <form id="regform">
+            <h1>/auth/register</h1>
             <label>username <input type="text" name="username" id="username"></label>
             <label>email <input type="email" name="email" id="email"></label>
             <label>password <input type="password" name="password" id="password"></label>
             <button>submit</button>
-            <pre class="message"></pre>
+            <textarea disabled class="message"></textarea disabled>
         </form>
 
-        <h1>/auth/login</h1>
         <form id="loginform">
+            <h1>/auth/login</h1>
             <label>email <input type="email" name="email" id="email"></label>
             <label>password <input type="password" name="password" id="password"></label>
             <button>submit</button>
-            <pre class="message"></pre>
+            <textarea disabled class="message"></textarea disabled>
         </form>
 
-        <h1>/users/get</h1>
         <form id="ugetform">
+            <h1>/users/get</h1>
             <label>user <input type="number" name="user" id="user"></label>
             <label>jwt <input type="password" name="password" id="password"></label>
             <button>submit</button>
-            <pre class="message"></pre>
-        </form>
+            <textarea disabled class="message"></textarea disabled>
+        </form> -->
     </body>
     <script>
-        regform.addEventListener("submit", event => {
-            event.preventDefault()
-            fetch("/auth/register", {
-                method: "POST",
-                body: JSON.stringify(Array.from((new FormData(event.target)).entries()).reduce((memo, [key, value]) => ({...memo, [key]: value}), {})),
-                headers: {"Content-Type": "application/json"}
-            }).then(async res => {
-                const data = await res.text()
-                event.target.querySelector(".message").textContent = data
-            }).catch(err => {event.target.querySelector(".message").textContent = err})
-        })
-
-        loginform.addEventListener("submit", event => {
-            event.preventDefault()
-            fetch("/auth/login", {
-                method: "POST",
-                body: JSON.stringify(Array.from((new FormData(event.target)).entries()).reduce((memo, [key, value]) => ({...memo, [key]: value}), {})),
-                headers: {"Content-Type": "application/json"}
-            }).then(async res => {
-                const data = await res.text()
-                event.target.querySelector(".message").textContent = data
-            }).catch(err => {event.target.querySelector(".message").textContent = err})
-        })
-
-        ugetform.addEventListener("submit", event => {
-            event.preventDefault()
-            const fd = new FormData(event.target)
-            fetch("/users/" + fd.get("user"), {
+        [
+            {
+                path: "/auth/register",
+                entries: [
+                    {name: "username", type: "text"},
+                    {name: "email", type: "email"},
+                    {name: "password", type: "password"},
+                ]
+            },
+            {
+                path: "/auth/login",
+                entries: [
+                    {name: "email", type: "email"},
+                    {name: "password", type: "password"},
+                ]
+            },
+            {
+                path: "/users/",
+                param: "user",
                 method: "GET",
-                headers: {"Content-Type": "application/json", "Authorization": "Bearer " + fd.get("password")}
-            }).then(async res => {
-                const data = await res.text()
-                event.target.querySelector(".message").textContent = data
-            }).catch(err => {event.target.querySelector(".message").textContent = err})
+                entries: [
+                    {name: "user", type: "number"},
+                    // {name: "jwt", type: "password"},
+                ]
+            },
+            {
+                path: "/products/",
+                param: "user",
+                method: "GET",
+                entries: [
+                    {name: "user", type: "number"},
+                    // {name: "jwt", type: "password"},
+                ]
+            },
+        ].forEach(el => {
+            let form = document.createElement("form")
+                let h1 = document.createElement("h1")
+                    h1.textContent = el.path
+                form.appendChild(h1)
+                el.entries.forEach(entry => {
+                    let label = document.createElement("label")
+                        label.textContent = entry.name
+                        let input = document.createElement("input")
+                            input.type = entry.type
+                            input.name = entry.name
+                            input.id = entry.name
+                        label.appendChild(input)
+                    form.appendChild(label)
+                })
+                let button = document.createElement("button")
+                    button.textContent = "submit"
+                form.appendChild(button)
+                form.appendChild(button)
+                form.addEventListener("submit", event => {
+                    event.preventDefault()
+                    const fd = new FormData(event.target)
+                    fetch(el.path + (el.param ? fd.get(el.param) : ""), {
+                        method: el.method ?? "POST",
+                        body: el.method !== "GET" ? JSON.stringify(Array.from((fd).entries()).reduce((memo, [key, value]) => ({...memo, [key]: value}), {})) : null,
+                        headers: {"Content-Type": "application/json"}
+                    }).then(async res => {
+                        const data = await res.text()
+                        event.target.querySelector(".message").textContent = data
+                    }).catch(err => {event.target.querySelector(".message").textContent = err})
+                })
+                let textarea = document.createElement("textarea")
+                    textarea.classList.add("message")
+                    textarea.setAttribute("disabled", "")
+                form.appendChild(textarea)
+            document.body.appendChild(form)
         })
+
+        // regform.addEventListener("submit", event => {
+        //     event.preventDefault()
+        //     fetch("/auth/register", {
+        //         method: "POST",
+        //         body: JSON.stringify(Array.from((new FormData(event.target)).entries()).reduce((memo, [key, value]) => ({...memo, [key]: value}), {})),
+        //         headers: {"Content-Type": "application/json"}
+        //     }).then(async res => {
+        //         const data = await res.text()
+        //         event.target.querySelector(".message").textContent = data
+        //     }).catch(err => {event.target.querySelector(".message").textContent = err})
+        // })
+
+        // loginform.addEventListener("submit", event => {
+        //     event.preventDefault()
+        //     fetch("/auth/login", {
+        //         method: "POST",
+        //         body: JSON.stringify(Array.from((new FormData(event.target)).entries()).reduce((memo, [key, value]) => ({...memo, [key]: value}), {})),
+        //         headers: {"Content-Type": "application/json"}
+        //     }).then(async res => {
+        //         const data = await res.text()
+        //         event.target.querySelector(".message").textContent = data
+        //     }).catch(err => {event.target.querySelector(".message").textContent = err})
+        // })
+
+        // ugetform.addEventListener("submit", event => {
+        //     event.preventDefault()
+        //     const fd = new FormData(event.target)
+        //     fetch("/users/" + fd.get("user"), {
+        //         method: "GET",
+        //         headers: {"Content-Type": "application/json", "Authorization": "Bearer " + fd.get("password")}
+        //     }).then(async res => {
+        //         const data = await res.text()
+        //         event.target.querySelector(".message").textContent = data
+        //     }).catch(err => {event.target.querySelector(".message").textContent = err})
+        // })
     </script>
 </html>

@@ -1,4 +1,4 @@
-import { User as UserObj } from "../db.js"
+import { User as UserObj, Role as RoleObj, DBEventEmitter } from "../db.js"
 
 class User {
     constructor(id, username, email) {
@@ -21,3 +21,13 @@ export async function find(obj) {
 export async function add(username, email, password) {
     return await UserObj.create({username, email, password})
 }
+
+export async function getRole(id) {
+    return await RoleObj.findOne({where: {id}})
+}
+
+DBEventEmitter.on("loaded", () => {
+    RoleObj.findOne({where: {id: "default"}}).then(d => {
+        if(!d || d[0]) RoleObj.create({id: "default"})
+    })
+})

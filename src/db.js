@@ -1,4 +1,5 @@
 import { Sequelize, DataTypes } from "sequelize";
+import EventEmitter from "node:events";
 
 const sequelize = new Sequelize({
     dialect: "sqlite",
@@ -25,7 +26,39 @@ const User = sequelize.define("User", {
     password: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    role: {
+        type: DataTypes.STRING,
+        allowNull: false, // this doesn't actually work in sqlite for some reason? "Cannot add a REFERENCES column with non-NULL default value"
+        defaultValue: "default",
+        references: {
+            model: "Role",
+            key: "id"
+        }
     }
+})
+
+const Role = sequelize.define("Role", {
+    id: {
+        type: DataTypes.STRING,
+        primaryKey: true,
+    },
+    purchase: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true
+    },
+    sell: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    changeRoles: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    banUsers: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
 })
 
 const Product = sequelize.define("Product", {
@@ -89,5 +122,9 @@ const OrderItem = sequelize.define("OrderItem", {
         defaultValue: 0
     }
 })
-{(async () => await sequelize.sync({ force: false }))(sequelize)}
-export { User, Product, Order, OrderItem }
+
+class DBEventEmitter extends EventEmitter {}
+const fin = new DBEventEmitter()
+
+{(async () => {await sequelize.sync({ force: false }); fin.emit("loaded")})(sequelize)}
+export { User, Role, Product, Order, OrderItem, fin as DBEventEmitter, sequelize,DataTypes }

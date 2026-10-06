@@ -1,5 +1,5 @@
 export function ID(res, id) {
-    if(!id || Number.isNaN(id)) return false, res.status(400).json({error: "id", message: "invalid id"});
+    if(!id || Number.isNaN(id) || !Number.isInteger(id)) return false, res.status(400).json({error: "id", message: "invalid id"});
     return true
 }
 

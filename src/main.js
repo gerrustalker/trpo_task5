@@ -2,6 +2,7 @@ import express from "express"
 import cors from "cors"
 import fs from "fs/promises"
 import path from "path"
+import cookieParser from "cookie-parser"
 
 const app = express()
 const baddies = new Map()
@@ -25,6 +26,7 @@ app.use(cors({
 // app.get("/", (req, res) => res.status(200).send("hi"))
 
 app.use(express.static(path.join(import.meta.dirname, "../public")))
+app.use(cookieParser());
 
 const db = {products: [], orders: [], users: []} // temp?
 
@@ -52,6 +54,9 @@ app.use("/auth", rauth)
 
 import rusers from "./controllers/users.js"
 app.use("/users", rusers)
+
+import rproducts from "./controllers/products.js"
+app.use("/products", rproducts)
 
 app.listen(3000, () => {
     console.log('Server is running on http://localhost:3000')

@@ -1,7 +1,7 @@
 import { verifyAccessToken } from "../utils/jwt.js"
 
 export function auth(req, res, next) {
-    const token = req.headers.authorization?.split(" ")[1]
+    const token = req.headers.authorization?.split(" ")[1] ?? req.cookies?.accessToken
     if (!token) return res.sendStatus(401)
 
     try {
