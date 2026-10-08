@@ -3,6 +3,7 @@ import * as IUsers from '../services/users.js'
 import { Password as validatePassword, Email as validateEmail, Username as validateUsername } from '../utils/validators.js'
 import { createHmac } from "node:crypto"
 import { generateTokens } from "../utils/jwt.js"
+import { auth } from '../middlewares/auth.js'
 
 const HASH_SALT = "supahpass" // i guess i can make it harder but idc rn
 

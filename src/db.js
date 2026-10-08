@@ -1,4 +1,5 @@
 import { Sequelize, DataTypes } from "sequelize";
+import { CronJob } from "cron";
 import EventEmitter from "node:events";
 
 const sequelize = new Sequelize({
@@ -35,6 +36,9 @@ const User = sequelize.define("User", {
             model: "Role",
             key: "id"
         }
+    },
+    isDeleted: {
+        type: DataTypes.BOOLEAN,
     }
 })
 
@@ -51,11 +55,19 @@ const Role = sequelize.define("Role", {
         type: DataTypes.BOOLEAN,
         defaultValue: false
     },
+    editProducts: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
     changeRoles: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
     },
     banUsers: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    deleteUsers: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
     },
@@ -79,6 +91,9 @@ const Product = sequelize.define("Product", {
         type: DataTypes.INTEGER,
         allowNull: false,
     },
+    isDeleted: {
+        type: DataTypes.BOOLEAN,
+    }
 })
 
 const Order = sequelize.define("Order", {
@@ -99,6 +114,9 @@ const Order = sequelize.define("Order", {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0
+    },
+    isDeleted: {
+        type: DataTypes.BOOLEAN,
     }
 })
 
@@ -126,5 +144,13 @@ const OrderItem = sequelize.define("OrderItem", {
 class DBEventEmitter extends EventEmitter {}
 const fin = new DBEventEmitter()
 
-{(async () => {await sequelize.sync({ force: false }); fin.emit("loaded")})(sequelize)}
+const isDeletedModels = [User, Product, Order]
+
+{(async () => {
+    await sequelize.sync({ force: false });
+    fin.emit("loaded")
+    new CronJob("15 * * * *", async () => {
+        isDeletedModels.forEach(el => el.destroy({where: {isDeleted: true}}))
+    }, null, true)
+})(sequelize)}
 export { User, Role, Product, Order, OrderItem, fin as DBEventEmitter, sequelize,DataTypes }

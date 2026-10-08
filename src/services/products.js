@@ -1,4 +1,4 @@
-import { Product } from "../db.js"
+import { Product as ProductObj } from "../db.js"
 
 class Product {
     constructor(id, name, article, price) {
@@ -7,10 +7,10 @@ class Product {
     }
 }
 
-export async function get(id) {
-    return await Product.findOne({where: {id}})
+export async function get(id, wd) {
+    return await ProductObj.findOne({where: {id, isDeleted: wd ? undefined : false}})
 }
 
 export async function add(email, password) {
-    return await Product.create({email, password})
+    return await ProductObj.create({email, password})
 }

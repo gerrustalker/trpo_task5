@@ -10,8 +10,8 @@ class User {
     }
 }
 
-export async function get(id) {
-    return await UserObj.findOne({where: {id}})
+export async function get(id, wd) {
+    return await UserObj.findOne({where: {id, isDeleted: wd ? undefined : false}})
 }
 
 export async function find(obj) {
@@ -20,6 +20,10 @@ export async function find(obj) {
 
 export async function add(username, email, password) {
     return await UserObj.create({username, email, password})
+}
+
+export async function markDeletion(id) {
+    return await UserObj.update({isDeleted: true}, {where: {id}})
 }
 
 export async function getRole(id) {

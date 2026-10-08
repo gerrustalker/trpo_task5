@@ -124,6 +124,7 @@
                 form.addEventListener("submit", event => {
                     event.preventDefault()
                     const fd = new FormData(event.target)
+                    event.target.querySelector(".message").textContent = ""
                     fetch(el.path + (el.param ? fd.get(el.param) : ""), {
                         method: el.method ?? "POST",
                         body: el.method !== "GET" ? JSON.stringify(Array.from((fd).entries()).reduce((memo, [key, value]) => ({...memo, [key]: value}), {})) : null,
